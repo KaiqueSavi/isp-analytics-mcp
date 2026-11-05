@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest -q
+      - name: Seed + handshake do servidor via stdio
+        run: |
+          isp-analytics-seed --out data/aurora.db
+          python - <<'PY'
+          import asyncio, os
+          from mcp import Client, StdioServerParameters
+          async def main():
+              async with Client(StdioServerParameters(command="isp-analytics-mcp", env=dict(os.environ))) as c:
+                  tools = await c.list_tools()
+                  assert len(tools.tools) == 13, tools
+                  r = await c.call_tool("overview", {})
+                  assert not r.is_error
+          asyncio.run(main())
+          PY

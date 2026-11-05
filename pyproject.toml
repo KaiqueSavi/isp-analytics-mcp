@@ -1,0 +1,35 @@
+[project]
+name = "isp-analytics-mcp"
+version = "0.1.0"
+description = "Servidor MCP de analytics (churn, inadimplência, retenção, vendas, suporte) sobre um banco sintético de provedor de internet."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Kaique Savi" }]
+dependencies = ["mcp>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "anyio>=4", "ruff>=0.6"]
+
+[project.scripts]
+isp-analytics-mcp = "isp_analytics_mcp.server:main"
+isp-analytics-seed = "isp_analytics_mcp.seed:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
